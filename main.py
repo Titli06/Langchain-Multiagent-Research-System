@@ -1,4 +1,4 @@
-from src.tools.tools import scrape_url
+from src.pipeline.pipeline import run_research_pipeline
 
-r=scrape_url("https://www.i-jmr.org/2024/1/e53616")
-print(r)
+topic = "The impact of artificial intelligence on healthcare"
+run_research_pipeline(topic)
