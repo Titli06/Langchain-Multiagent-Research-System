@@ -518,11 +518,14 @@ if st.session_state.running and not st.session_state.done:
             f"DETAILED SCRAPED CONTENT:\n{results['reader']}"
         )
 
-        results["writer"] = writer_chain.invoke({
+        initial_report = writer_chain.invoke({
             "topic": topic_val,
-            "research": research_combined
+            "research": research_combined,
+            "critic_feedback": "",
+            "existing_report": ""
         })
 
+        results["writer"] = initial_report
         st.session_state.results = dict(results)
 
     # ── Step 4: Critic ──
@@ -530,6 +533,18 @@ if st.session_state.running and not st.session_state.done:
 
         results["critic"] = critic_chain.invoke({
             "report": results["writer"]
+        })
+
+        st.session_state.results = dict(results)
+
+    # ── Step 5: Rewrite using critic feedback ──
+    with st.spinner("🔁 Writer is revising the report with feedback…"):
+
+        results["writer"] = writer_chain.invoke({
+            "topic": topic_val,
+            "research": research_combined,
+            "critic_feedback": results["critic"],
+            "existing_report": initial_report
         })
 
         st.session_state.results = dict(results)

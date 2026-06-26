@@ -40,10 +40,14 @@ def run_research_pipeline(topic: str)->dict:
         f"SEARCH RESULTS:\n{state['search_results']}\n\n"
         f"SCRAPE CONTENTS:\n{state['scraped_contents']}"
     )
-    state["report"] = writer_chain.invoke({
+    initial_report = writer_chain.invoke({
         "topic": topic,
-        "research": research_combined
+        "research": research_combined,
+        "critic_feedback": "",
+        "existing_report": ""
     })
+
+    state["report"] = initial_report
 
     print("\n"+"Generated Report:"+"\n", state["report"])
 
@@ -56,5 +60,15 @@ def run_research_pipeline(topic: str)->dict:
     })
 
     print("\n"+"Critic Feedback:"+"\n", state["feedback"])
+
+    # Step 5: Rewrite the report using the critic feedback
+    state["report"] = writer_chain.invoke({
+        "topic": topic,
+        "research": research_combined,
+        "critic_feedback": state["feedback"],
+        "existing_report": initial_report
+    })
+
+    print("\n"+"Improved Report:"+"\n", state["report"])
 
     return state
